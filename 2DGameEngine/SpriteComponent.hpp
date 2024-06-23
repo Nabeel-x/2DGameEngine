@@ -3,6 +3,8 @@
 #include "Components.hpp"
 #include "SDL2/SDL.h"
 #include "TextureManager.hpp"
+#include "Animation.hpp"
+#include <map>
 
 class SpriteComponent : public Component {
 private:
@@ -15,14 +17,21 @@ private:
 	int speed = 100;
 
 public:
+	int animIndex = 0;
+	std::map<const char*, Animation> animations;
 	SpriteComponent() = default;
 	SpriteComponent(const char* path) {
 		setTex(path);
 	}
-	SpriteComponent(const char* path,int nFrames,int mSpeed) {
-		animated = true;
-		frames = nFrames;
-		speed = mSpeed;
+	SpriteComponent(const char* path,bool isAnimated) {
+		animated = isAnimated;
+		Animation idle = Animation(0, 7, 100);
+		Animation walk = Animation(1, 7, 100);
+		Animation run = Animation(2, 8, 100);
+		animations.emplace("Idle", idle);
+		animations.emplace("Walk", walk);
+		animations.emplace("Run", run);
+		play("Idle");
 		setTex(path);
 	}
 	void setTex(const char* path) {
@@ -38,7 +47,7 @@ public:
 		if (animated) {
 			srcRect.x = srcRect.w * static_cast<int>((SDL_GetTicks() / speed) % frames);
 		}
-		
+		srcRect.y = animIndex * transform->height;
 		desRect.x = static_cast<int>(transform->position.x);
 		desRect.y = static_cast<int>(transform->position.y);
 		desRect.w = transform->width * transform->scale;
@@ -46,5 +55,10 @@ public:
 	}
 	void draw() override {
 		TextureManager::Draw(texture, srcRect, desRect);
+	}
+	void play(const char* animName) {
+		frames = animations[animName].frames;
+		animIndex = animations[animName].index;
+		speed = animations[animName].speed;
 	}
 };
