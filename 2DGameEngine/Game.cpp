@@ -13,6 +13,12 @@ std::vector<ColliderComponent*> Game::colliders;
 auto& Player(manager.addEntity());
 auto& Wall(manager.addEntity());
 
+enum groupLabel :std::size_t {
+	groupMap,
+	groupPlayers,
+	groupEnemies,
+	groupColliders,
+};
 Game::Game() {
 
 }
@@ -48,14 +54,15 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	}
 
 	Map::LoadMap("assets/map.map",16,16);
-	Player.addComponent<TransformComponent>(0.0f,0.0f,100,100,1);
-	Player.addComponent<SpriteComponent>("assets/player.png");
+	Player.addComponent<TransformComponent>(0.0f,0.0f,128,128,1);
+	Player.addComponent<SpriteComponent>("assets/idle.png",7,100);
 	Player.addComponent<KeyboardController>();
 	Player.addComponent<ColliderComponent>("player");
-
-	Wall.addComponent<TransformComponent>(300.0f,300.0f,100,115,1);
+	Player.addGroup(groupPlayers);
+	Wall.addComponent<TransformComponent>(500.0f,300.0f,115,100,1);
 	Wall.addComponent<SpriteComponent>("assets/dirt.png");
 	Wall.addComponent<ColliderComponent>("wall");
+	Wall.addGroup(groupMap);
 }
 
 void Game::handleEvents() {
@@ -77,10 +84,21 @@ void Game::update() {
 		Collision::AABB(Player.getComponent<ColliderComponent>(), *cc);
 	}
 }
+auto& tiles(manager.getGroup(groupMap));
+auto& players(manager.getGroup(groupPlayers));
+auto& enemies(manager.getGroup(groupEnemies));
 
 void Game::render() {
 	SDL_RenderClear(renderer);
-	manager.draw();
+	for (auto& t : tiles) {
+		t->draw();
+	}
+	for (auto& p : players) {
+		p->draw();
+	}
+	for (auto& e : enemies) {
+		e->draw();
+	}
 	SDL_RenderPresent(renderer);
 }
 
@@ -94,4 +112,5 @@ void Game::clean(){
 void Game::addTile(int id, int x, int y) {
 	auto& tile(manager.addEntity());
 	tile.addComponent<TileComponent>(x,y,32,32,id);
+	tile.addGroup(groupMap);
 }
