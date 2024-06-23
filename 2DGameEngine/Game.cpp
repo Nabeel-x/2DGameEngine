@@ -12,9 +12,6 @@ std::vector<ColliderComponent*> Game::colliders;
 
 auto& Player(manager.addEntity());
 auto& Wall(manager.addEntity());
-auto& tile0(manager.addEntity());
-auto& tile1(manager.addEntity());
-auto& tile2(manager.addEntity());
 
 Game::Game() {
 
@@ -49,15 +46,10 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	if (map) {
 		std::cout << "Map added" << std::endl;
 	}
-	tile0.addComponent<TileComponent>(200,200,32,32,0);
-	tile1.addComponent<TileComponent>(250,250,32,32,1);
-	tile1.addComponent<ColliderComponent>("dirt");
-	tile2.addComponent<TileComponent>(150,150,32,32,2);
-	tile2.addComponent<ColliderComponent>("grass");
 
-
+	Map::LoadMap("assets/map.map",16,16);
 	Player.addComponent<TransformComponent>(0.0f,0.0f,100,100,1);
-	Player.addComponent<SpriteComponent>("assets/adwait100no.png");
+	Player.addComponent<SpriteComponent>("assets/player.png");
 	Player.addComponent<KeyboardController>();
 	Player.addComponent<ColliderComponent>("player");
 
@@ -88,7 +80,6 @@ void Game::update() {
 
 void Game::render() {
 	SDL_RenderClear(renderer);
-	//map->DrawMap();
 	manager.draw();
 	SDL_RenderPresent(renderer);
 }
@@ -98,4 +89,9 @@ void Game::clean(){
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 	std::cout << "Game cleaned" << std::endl;
+}
+
+void Game::addTile(int id, int x, int y) {
+	auto& tile(manager.addEntity());
+	tile.addComponent<TileComponent>(x,y,32,32,id);
 }
