@@ -26,9 +26,10 @@ public:
 	static SDL_Event event;
 	static void addTile(int srcX, int srcY, int xpos, int ypos);
 	static std::vector<ColliderComponent*>colliders;
+	static bool isRunning;
+	static SDL_Rect camera;
 private:
 	int counter = 0;
-	bool isRunning;
 	SDL_Window* window;
 };
 
